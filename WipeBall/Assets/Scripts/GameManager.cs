@@ -1,14 +1,13 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; // Necesario para reiniciar
 
 public class GameManager : MonoBehaviour
 {
-    public Transform spawnPoint; // Dónde reaparece el jugador
+    public Transform spawnPoint; // Aquí guardaremos SIEMPRE el último checkpoint
     public GameObject player;
 
     void Update()
     {
-        // Si el jugador cae muy abajo (por seguridad) o toca el agua
+        // Si caemos al vacío
         if (player.transform.position.y < -10)
         {
             Respawn();
@@ -17,9 +16,20 @@ public class GameManager : MonoBehaviour
 
     public void Respawn()
     {
-        // Resetear posición y física
+        // 1. Teletransportar al último punto guardado
         player.transform.position = spawnPoint.position;
-        player.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
-        player.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+        player.transform.rotation = spawnPoint.rotation; // Importante: Mirar hacia donde mira el checkpoint
+
+        // 2. Resetear físicas (para que no salga disparado)
+        Rigidbody rb = player.GetComponent<Rigidbody>();
+        rb.linearVelocity = Vector3.zero; // En Unity 6 se llama linearVelocity (antes velocity)
+        rb.angularVelocity = Vector3.zero;
+    }
+
+    // ESTA ES LA FUNCIÓN NUEVA
+    public void UpdateSpawnPoint(Transform newSpawn)
+    {
+        spawnPoint = newSpawn;
+        Debug.Log("Checkpoint guardado: " + newSpawn.name); // Para ver en consola que funciona
     }
 }
